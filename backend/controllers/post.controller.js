@@ -1,3 +1,4 @@
+import ImageKit from "imagekit";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 
@@ -20,7 +21,7 @@ export const getPost = async (req, res) => {
 
 export const createPost = async (req, res) => {
   try {
-    const clerkUserId = req.body.user;
+    const clerkUserId = req.auth.userId;
     
     if (!clerkUserId) {
       return res.status(401).json("Not authenticated!");
@@ -32,10 +33,19 @@ export const createPost = async (req, res) => {
       return res.status(404).json("User not found!");
     }
 
-    const newPost = new Post({
-      user: user._id,
-      ...req.body,
-    });
+    let slug = req.body.title.replace(/ /g, "-").toLowerCase();
+
+  let existingPost = await Post.findOne({ slug });
+
+  let counter = 2;
+
+  while (existingPost) {
+    slug = `${slug}-${counter}`;
+    existingPost = await Post.findOne({ slug });
+    counter++;
+  }
+
+  const newPost = new Post({ user: user._id, slug, ...req.body });
 
     const savedPost = await newPost.save();
     res.status(200).json(savedPost);
@@ -89,3 +99,18 @@ export const featurePost = async (req, res) => {
     res.status(500).json(err);
   }
 }
+
+const imagekit = new ImageKit({
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+});
+
+export const uploadAuth = async (req, res) => {
+  try {
+    const result = imagekit.getAuthenticationParameters();
+  res.send(result);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
