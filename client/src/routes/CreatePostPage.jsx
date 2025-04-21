@@ -54,7 +54,7 @@ const CreatePostPage = () => {
     },
     onSuccess: (res) => {
       toast.success("Post has been created!");
-      // navigate(`/${res.data.slug}`);
+      navigate(`/${res.data.slug}`);
     },
     onError: (error) => {
       toast.error("Failed to create post.");

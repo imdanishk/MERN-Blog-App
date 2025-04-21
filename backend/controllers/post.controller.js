@@ -79,7 +79,10 @@ export const getPosts = async (req, res) => {
 }
 export const getPost = async (req, res) => {
   try {
-    const post = await Post.findOne({ slug: req.params.slug });
+    const post = await Post.findOne({ slug: req.params.slug }).populate(
+      "user",
+      "username" 
+    );
     res.status(200).json(post);
   } catch (err) {
     res.status(500).json(err);
