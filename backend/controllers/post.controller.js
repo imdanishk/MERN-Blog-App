@@ -125,24 +125,20 @@ export const createPost = async (req, res) => {
 }
 
 export const deletePost = async (req, res) => {
-  try {
-    const clerkUserId = req.auth.userId;
+  const clerkUserId = req.auth.userId;
 
   if (!clerkUserId) {
     return res.status(401).json("Not authenticated!");
   }
 
+  const role = req.auth.sessionClaims?.metadata?.role || "user";
+
+  if (role === "admin") {
+    await Post.findByIdAndDelete(req.params.id);
+    return res.status(200).json("Post has been deleted");
+  }
+
   const user = await User.findOne({ clerkUserId });
-
-  if (!user) {
-    return res.status(404).json("User not found!");
-  }
-
-  const post = await Post.findById(req.params.id);
-
-  if (!post) {
-    return res.status(404).json("Post not found!");
-  }
 
   const deletedPost = await Post.findOneAndDelete({
     _id: req.params.id,
@@ -154,21 +150,40 @@ export const deletePost = async (req, res) => {
   }
 
   res.status(200).json("Post has been deleted");
-  } catch (err) {
-    res.status(500).json(err);
-  }
-}
+};
 
 export const featurePost = async (req, res) => {
-  try {
-    const post = await Post.findById(req.body.id);
-    post.featured = !post.featured;
-    const updatedPost = await post.save();
-    res.status(200).json(updatedPost);
-  } catch (err) {
-    res.status(500).json(err);
+  const clerkUserId = req.auth.userId;
+  const postId = req.body.postId;
+
+  if (!clerkUserId) {
+    return res.status(401).json("Not authenticated!");
   }
-}
+
+  const role = req.auth.sessionClaims?.metadata?.role || "user";
+
+  if (role !== "admin") {
+    return res.status(403).json("You cannot feature posts!");
+  }
+
+  const post = await Post.findById(postId);
+
+  if (!post) {
+    return res.status(404).json("Post not found!");
+  }
+
+  const isFeatured = post.isFeatured;
+
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    {
+      isFeatured: !isFeatured,
+    },
+    { new: true }
+  );
+
+  res.status(200).json(updatedPost);
+};
 
 const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
