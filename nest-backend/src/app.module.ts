@@ -1,10 +1,36 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
+import { WebhookModule } from './webhook/webhook.module';
+import { AuthMiddleware } from './auth/middlewares/auth.middleware';
+import appConfig from './config/config';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',     // ← optional, defaults to '.env'
+      load: [appConfig], 
+    }),
+    MongooseModule.forRoot(process.env.MONGO_CONNECTION_URL || ''),
+    UsersModule,
+    PostsModule,
+    CommentsModule,
+    WebhookModule,
+  ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .exclude(
+        { path: 'webhooks/(.*)', method: RequestMethod.ALL },
+        { path: 'posts', method: RequestMethod.GET },
+        { path: 'posts/:slug', method: RequestMethod.GET },
+      )
+      .forRoutes('*');
+  }
+}

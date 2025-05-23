@@ -1,98 +1,245 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Express to NestJS Migration Guide
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This guide covers the migration process from the existing Express.js blog API to a modern NestJS implementation with Swagger documentation.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [Key Architecture Changes](#key-architecture-changes)
+4. [Migrating Authentication](#migrating-authentication)
+5. [Swagger API Documentation](#swagger-api-documentation)
+6. [Testing the New API](#testing-the-new-api)
+7. [Optimization Highlights](#optimization-highlights)
+8. [Conclusion](#conclusion)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Introduction
 
-## Project setup
+NestJS is a progressive Node.js framework for building efficient, reliable, and scalable server-side applications. It uses TypeScript and combines elements of OOP, FP, and FRP.
 
-```bash
-$ npm install
-```
+**Benefits of migrating to NestJS:**
 
-## Compile and run the project
+- **Modularity** - Clear separation of concerns with modules
+- **TypeScript Integration** - Type safety, better intellisense
+- **Dependency Injection** - Better testability and loose coupling
+- **Decorators** - Declarative API endpoints and validation
+- **Built-in Swagger Support** - Automatic API documentation
+- **Middleware & Guards** - Enhanced request pipeline
+- **DTOs & Entities** - Clear data models
+- **Exception Filters** - Better error handling
 
-```bash
-# development
-$ npm run start
+## Getting Started
 
-# watch mode
-$ npm run start:dev
+### Prerequisites
 
-# production mode
-$ npm run start:prod
-```
+- Node.js (v16+)
+- npm or yarn
+- MongoDB
 
-## Run tests
+### Installation
+
+1. Create a new NestJS project:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm i -g @nestjs/cli
+nest new blog-api
+cd blog-api
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+2. Install required dependencies:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install --save @nestjs/mongoose mongoose @nestjs/config @nestjs/swagger
+npm install --save @clerk/clerk-sdk-node svix imagekit
+npm install --save-dev @types/mongoose
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. Project structure setup:
 
-## Resources
+Follow the provided project structure to organize your code into modules, controllers, services, and entities.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Key Architecture Changes
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Express vs NestJS Structure
 
-## Support
+| Express Structure              | NestJS Structure                              |
+| ------------------------------ | --------------------------------------------- |
+| routes/user.route.js           | users/users.controller.ts                     |
+| controllers/user.controller.js | users/users.service.ts                        |
+| models/user.model.js           | users/entities/user.entity.ts                 |
+| middlewares/increaseVisit.js   | posts/middleware/increase-visit.middleware.ts |
+| N/A                            | users/dto/user.dto.ts                         |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Database Models to Schema Classes
 
-## Stay in touch
+**Express Mongoose Schema:**
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```javascript
+const userSchema = new Schema({
+  clerkUserId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  // ...
+});
+```
 
-## License
+**NestJS Mongoose Schema:**
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```typescript
+@Schema({ timestamps: true })
+export class User {
+  @Prop({ required: true, unique: true })
+  clerkUserId: string;
+
+  // ...
+}
+```
+
+### Route Handlers to Controllers
+
+**Express Route Handler:**
+
+```javascript
+router.get('/saved', getUserSavedPosts);
+```
+
+**NestJS Controller:**
+
+```typescript
+@Get('saved')
+@UseGuards(ClerkAuthGuard)
+async getUserSavedPosts(@Req() req: Request) {
+  return this.usersService.getUserSavedPosts(req['auth'].userId);
+}
+```
+
+## Migrating Authentication
+
+The migration preserves the existing Clerk authentication system while enhancing it with NestJS guards and middleware:
+
+1. **Auth Middleware**: Verifies Clerk JWT tokens and attaches user data to the request
+
+2. **Auth Guards**: Protects endpoints that require authentication
+
+```typescript
+@Injectable()
+export class ClerkAuthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    if (!request.auth || !request.auth.userId) {
+      throw new UnauthorizedException('Not authenticated!');
+    }
+    return true;
+  }
+}
+```
+
+3. **Admin Guard**: Restricts access to admin-only endpoints based on Clerk user roles
+
+## Swagger API Documentation
+
+NestJS provides built-in support for Swagger/OpenAPI documentation.
+
+1. **Setup in `main.ts`:**
+
+```typescript
+const config = new DocumentBuilder()
+  .setTitle('Blog API')
+  .setDescription('Blog API documentation')
+  .setVersion('1.0')
+  .addTag('blog')
+  .addBearerAuth(
+    {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      in: 'header',
+    },
+    'clerk-token',
+  )
+  .build();
+
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api-docs', app, document);
+```
+
+2. **Decorators for endpoints and DTOs:**
+
+```typescript
+@ApiTags('posts')
+@Controller('posts')
+export class PostsController {
+  @Get()
+  @ApiOperation({ summary: 'Get all posts with pagination and filters' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns posts and pagination info',
+  })
+  async getPosts(@Query() queryPostDto: QueryPostDto) {
+    // ...
+  }
+}
+```
+
+## Testing the New API
+
+1. **Start the server:**
+
+```bash
+npm run start:dev
+```
+
+2. **Access Swagger documentation:**
+
+Open your browser and navigate to [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+3. **Test endpoints using Swagger UI or tools like Postman**
+
+## Optimization Highlights
+
+The NestJS migration introduces several optimizations:
+
+1. **Improved Error Handling**:
+
+   - Standardized HTTP exceptions
+   - Global exception filter
+
+2. **Request Validation**:
+
+   - DTO-based validation using class-validator
+   - Automatic request body transformation
+
+3. **Query Optimization**:
+
+   - Typed query parameters
+   - Efficient MongoDB query construction
+
+4. **Type Safety**:
+
+   - TypeScript interfaces and types
+   - Mongoose schema typing
+
+5. **Code Organization**:
+
+   - Clear module boundaries
+   - Separation of business logic in services
+   - Controllers focused on HTTP concerns
+   - Entities representing data models
+
+6. **Authentication Improvements**:
+
+   - Guard-based protection
+   - Role-based access control
+   - Middleware for JWT verification
+
+7. **Documentation**:
+
+   - Comprehensive Swagger documentation
+   - API grouping and tagging
+   - Parameter and response documentation
+
+## Conclusion
+
+This migration transforms the Express.js blog API into a robust, type-safe, and well-structured NestJS application with comprehensive documentation and enhanced maintainability.
