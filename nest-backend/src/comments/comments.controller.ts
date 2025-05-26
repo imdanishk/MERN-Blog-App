@@ -14,8 +14,8 @@ import { CreateCommentDto } from './dto/comment.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Request } from 'express';
 
-@ApiTags('comments')
-@Controller('comments')
+@ApiTags('api/comments')
+@Controller('api/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
