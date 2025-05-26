@@ -16,8 +16,8 @@ import { CreatePostDto, QueryPostDto, FeaturePostDto } from './dto/post.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
 
-@ApiTags('posts')
-@Controller('posts')
+@ApiTags('api/posts')
+@Controller('api/posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 

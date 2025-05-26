@@ -7,8 +7,8 @@ import { User } from './entities/user.entity';
 import { Req } from '@nestjs/common';
 import { Request } from 'express';
 
-@ApiTags('users')
-@Controller('users')
+@ApiTags('api/users')
+@Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

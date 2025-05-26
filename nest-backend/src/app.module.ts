@@ -28,8 +28,8 @@ export class AppModule {
       .apply(AuthMiddleware)
       .exclude(
         { path: 'webhooks/(.*)', method: RequestMethod.ALL },
-        { path: 'posts', method: RequestMethod.GET },
-        { path: 'posts/:slug', method: RequestMethod.GET },
+        { path: 'api/posts', method: RequestMethod.GET },
+        { path: 'api/posts/:slug', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }
